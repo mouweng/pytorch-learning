@@ -78,6 +78,8 @@ display(img)
 
 ## Tensorboard使用
 
+> TensorBoard 是用于提供机器学习工作流程期间所需的测量和可视化的工具。 它使您能够跟踪实验指标，例如损失和准确性，可视化模型图，将嵌入物投影到较低维度的空间等等。
+
 ### conda安装
 
 ```shell
@@ -130,4 +132,127 @@ tensorboard --logdir=logs --port=6006
 
 ## Transforms使用
 
-transforms的结构和用法
+### 常用API
+
+- ToTensor：把图片类型（PIL IMAGE）和 数组类型（numpy.ndarray）转换成tensor
+- Normalize：主要用于图片的归一化
+- Resize：用于图片更改大小
+- Compose：将几个transform组合在一起，后面一个参数需要的输入，和前面一个参数的输出是要一致的！
+- RandomCrop：随机裁剪
+
+### transforms的结构和用法
+
+![transforms的结构和用法](https://cdn.jsdelivr.net/gh/mouweng/FigureBed/img/202204261027759.jpg)
+
+**为什么需要tensor的数据类型？**
+
+tensor是一种强大的表示方向和空间的数学方法。其实这些东西就是numpy，转成tensor是为了加速计算。
+
+### transforms使用
+
+#### ToTensor使用
+
+```python
+from PIL import Image
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import transforms
+
+writer = SummaryWriter("logs")
+img_path = "./dataset/train/ants_image/0013035.jpg"
+img = Image.open(img_path)
+print(img)
+
+trans_totensor = transforms.ToTensor()
+img_tensor = trans_totensor(img)
+print(img_tensor)
+writer.add_image("ToTensor", img_tensor)
+writer.close()
+```
+
+#### Normalize
+
+ ```python
+ from PIL import Image
+ from torch.utils.tensorboard import SummaryWriter
+ from torchvision import transforms
+ 
+ writer = SummaryWriter("logs")
+ img_path = "./dataset/train/ants_image/0013035.jpg"
+ img = Image.open(img_path)
+ print(img)
+ 
+ trans_totensor = transforms.ToTensor()
+ img_tensor = trans_totensor(img)
+ 
+ trans_norm = transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+ img_norm = trans_norm(img_tensor)
+ writer.add_image("Normalize", img_norm)
+ writer.close()
+ ```
+
+#### Resize
+
+```python
+from PIL import Image
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import transforms
+
+writer = SummaryWriter("logs")
+img_path = "./dataset/train/ants_image/0013035.jpg"
+img = Image.open(img_path)
+print(img)
+
+trans_resize = transforms.Resize((512, 512))
+img_resize = trans_resize(img)
+print(img_resize)
+
+trans_totensor = transforms.ToTensor()
+img_resize_tensor = trans_totensor(img_resize)
+
+writer.add_image("Resize", img_resize_tensor)
+writer.close()
+```
+
+#### Compose
+
+```python
+from PIL import Image
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import transforms
+
+writer = SummaryWriter("logs")
+img_path = "./dataset/train/ants_image/0013035.jpg"
+img = Image.open(img_path)
+print(img)
+
+trans_resize_2 = transforms.Resize((256, 256))
+trans_totensor = transforms.ToTensor()
+trans_compose = transforms.Compose([trans_resize_2, trans_totensor])
+img_resize_2 = trans_compose(img)
+print(img_resize_2)
+
+writer.add_image("Resize2", img_resize_2)
+writer.close()
+```
+
+#### RandomCrop
+
+```python
+from PIL import Image
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import transforms
+
+writer = SummaryWriter("logs")
+img_path = "./dataset/train/ants_image/0013035.jpg"
+img = Image.open(img_path)
+print(img)
+
+trans_random = transforms.RandomCrop(512)
+trans_totensor = transforms.ToTensor()
+trans_compose = transforms.Compose([trans_random, trans_totensor])
+for i in range(10):
+    img_random = trans_compose(img)
+    writer.add_image("random", img_random, i)
+writer.close()
+```
+
