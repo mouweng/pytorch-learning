@@ -1,4 +1,7 @@
-logs/
+train_model/
+logs*/
+tv_dataset/
+data/
 *.bundle.*
 lib/
 node_modules/
