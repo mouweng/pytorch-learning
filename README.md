@@ -1035,3 +1035,50 @@ for i in range(epoch):
 writer.close()
 ```
 
+## 模型验证
+
+```python
+import torchvision
+import torch
+from PIL import Image
+from torchvision.transforms import Compose, Resize, ToTensor
+from torch import nn
+from torch.nn import Conv2d, MaxPool2d, Flatten, Linear, Sequential, CrossEntropyLoss
+
+# 加载图片
+image_path = "./dataset/my_test_image/dog.jpg"
+image = Image.open(image_path)
+# 图片格式化处理
+transform = Compose([Resize((32, 32)),ToTensor()])
+image = transform(image)
+image = torch.reshape(image, (1,3,32,32))
+print(image.shape)
+
+# 搭建神经模型
+class Tudui(nn.Module):
+    def __init__(self):
+        super(Tudui, self).__init__()
+        self.model1 = Sequential(
+            Conv2d(3, 32, kernel_size=5, padding=2),
+            MaxPool2d(kernel_size=2),
+            Conv2d(32, 32, kernel_size=5, padding=2),
+            MaxPool2d(kernel_size=2),
+            Conv2d(32, 64, kernel_size=5, padding=2),
+            MaxPool2d(kernel_size=2),
+            Flatten(),
+            Linear(1024, 64),
+            Linear(64, 10)
+        )
+        
+    def forward(self, x):
+        x = self.model1(x)
+        return x
+
+# 预测
+model = torch.load("./train_model/tudui_10.pth")
+print(model)
+output = model(image)
+print(output)
+
+print(output.argmax(1))
+```
